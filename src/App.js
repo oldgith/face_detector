@@ -84,33 +84,38 @@ const intialState={
 
 
      onSubmit=()=>{
-            console.log("click");
-  this.setState({imageUrl:this.state.input})
-        fetch("http://localhost:3001/imageUrl",{
-              method:'post',
-              headers:{'Content-Type':"application/json"},
-              body:JSON.stringify({
-                  input:this.state.input,
-              })  
-          })
-          .then(res=>res.json())
-          .then(response=>{
-            if(response){
-               fetch("http://localhost:3001/image",{
-                method:'put',
-                headers:{'Content-Type':"application/json"},
-                body:JSON.stringify({
-                    id:this.state.user.id,
-                })
-            }).then(response=>response.json())
-            .then(count=>{
-              this.setState(Object.assign(this.state.user,{entries:count}))
-            })
-            .catch(err=> console.log("ooops err"))
-            this.updateBox(this.calculateFaceLocation(response))
-            } 
-          })
-          .catch(err=> console.log("err in getting info from imageUrl"))
+       /* 
+       1.Pass the input to imageUrl end point
+       --> Imageurl sends url with api key to clarifai <-----Clarifai sends reponse(it have box cordinates)
+          then imageUrl(backend) convert that into json and send it to front end
+       As fecth returns a promise it needs to be converted into json
+       2. if data recieved from backend make a box by that data and show it to user and update the count by another fetch          
+       */
+      fetch("http://localhost:3001/imageUrl",{
+        method:'post',
+        headers:{'Content-Type':"application/json"},
+        body:JSON.stringify({
+            input:this.state.input,
+        })  
+       })
+       .then(response=>response.json())
+       .then(data=>{
+            if(data){
+                    fetch("http://localhost:3001/image",{
+                      method:'put',
+                      headers:{'Content-Type':"application/json"},
+                      body:JSON.stringify({ id:this.state.user.id})
+                    })
+                    .then(response=>response.json())
+                    .then(count=>{
+                      this.setState(Object.assign(this.state.user,{entries:count}))
+                    })
+                    .catch(err=> console.log("can't update count", err))
+           this.updateBox(this.calculateFaceLocation(data))   
+            }
+       })
+      .catch(err=> console.log("ooops err")) 
+       
           
      }     
             
