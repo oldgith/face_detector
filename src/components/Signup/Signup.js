@@ -22,7 +22,7 @@ class Signup extends Component{
         // console.log(this.state.signupPass)
     }
     onSubmitSignup=()=>{
-        fetch("http://localhost:3001/signup",{
+        fetch("https://secure-dusk-55738.herokuapp.com/signup",{
             method:'post',
             headers:{'Content-Type':"application/json"},
             body:JSON.stringify({

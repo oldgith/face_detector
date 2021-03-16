@@ -91,7 +91,7 @@ const intialState={
        As fecth returns a promise it needs to be converted into json
        2. if data recieved from backend make a box by that data and show it to user and update the count by another fetch          
        */
-      fetch("http://localhost:3001/imageUrl",{
+      fetch("https://secure-dusk-55738.herokuapp.com/imageUrl",{
         method:'post',
         headers:{'Content-Type':"application/json"},
         body:JSON.stringify({
@@ -101,7 +101,7 @@ const intialState={
        .then(response=>response.json())
        .then(data=>{
             if(data){
-                    fetch("http://localhost:3001/image",{
+                    fetch("https://secure-dusk-55738.herokuapp.com/image",{
                       method:'put',
                       headers:{'Content-Type':"application/json"},
                       body:JSON.stringify({ id:this.state.user.id})

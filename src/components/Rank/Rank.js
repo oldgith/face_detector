@@ -3,7 +3,7 @@ const Rank=({name,entries})=>{
     return (
         <div>
             <div>
-           <p className='f2'>{`${name} ,ur  Current Rank is ... ${entries}`} </p>        
+           <p className='f2'>{`${name} ,ur  Current search count is ... ${entries}`} </p>        
             </div>
          
         </div>
