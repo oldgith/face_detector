@@ -1,8 +1,9 @@
-const Rank=()=>{
+const Rank=({name,entries})=>{
+    console.log(entries)
     return (
         <div>
             <div>
-           <p className='f2'>Current Rank is #XYZ </p>        
+           <p className='f2'>{`${name} ,ur  Current Rank is ... ${entries}`} </p>        
             </div>
          
         </div>

@@ -6,14 +6,12 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm'
 import Rank from './components/Rank/Rank'
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
+
 import Facerecognition from './components/Facerecognition/Facerecognition'
 import Signin from './components/Signin/Signin'
 import Signup from './components/Signup/Signup'
 
-const app = new Clarifai.App({
- apiKey: 'bb95049e7de545de91b24a3e1b272a7a'
-});
+
 
 const particleOptions={
   particles: {
@@ -27,26 +25,45 @@ const particleOptions={
 }
 }
 
+const intialState={
+  input:'',
+  box:{},
+  route:'signin',
+  isSignedin:'false',
+  user:{
+    id:'',
+    name:'',
+    email:'',
+    entries:0,
+    joined:''
 
+  }
+
+}
 
   class App extends Component {
         constructor(){
           super();
-          this.state={
-            input:'',
-            box:{},
-            route:'signin',
-            isSignedin:'false'
-          }
+          this.state={intialState }
       }
 
+    loadUser=(user)=>{
+      this.setState({user:{ 
+        id:user.id,
+      name:user.name,
+      email:user.email,
+      entries:user.entries,
+      joined:user.joined}})
+
+    }
+
         calculateFaceLocation=(data)=>{
-          console.log("resp :",data.outputs[0].data.regions[0].region_info.bounding_box);
+          // console.log("resp :",data.outputs[0].data.regions[0].region_info.bounding_box);
           const tempBox=data.outputs[0].data.regions[0].region_info.bounding_box;
          const image= document.getElementById("inputImage");
          const width=Number(image.width);
          const height=Number(image.height);
-         console.log(`leftcor is ${tempBox.left_col*width}, rightcor is ${tempBox.right_col*width}  `)
+        //  console.log(`leftcor is ${tempBox.left_col*width}, rightcor is ${tempBox.right_col*width}  `)
           return {
             
             leftcol:tempBox.left_col*width,
@@ -58,7 +75,7 @@ const particleOptions={
           
         updateBox=(box)=>{
           this.setState({box:box})
-          console.log(this.state.box)
+          // console.log(this.state.box)
         } 
        
          onInputChange=(event)=>{
@@ -66,18 +83,46 @@ const particleOptions={
           }
 
 
-          onSubmit=()=>{
+     onSubmit=()=>{
             console.log("click");
-
-            app.models.predict(Clarifai.FACE_DETECT_MODEL, `${this.state.input}`)
-            .then(response =>this.updateBox(this.calculateFaceLocation(response)))
-              
+  this.setState({imageUrl:this.state.input})
+        fetch("http://localhost:3001/imageUrl",{
+              method:'post',
+              headers:{'Content-Type':"application/json"},
+              body:JSON.stringify({
+                  input:this.state.input,
+              })  
+          })
+          .then(res=>res.json())
+          .then(response=>{
+            if(response){
+               fetch("http://localhost:3001/image",{
+                method:'put',
+                headers:{'Content-Type':"application/json"},
+                body:JSON.stringify({
+                    id:this.state.user.id,
+                })
+            }).then(response=>response.json())
+            .then(count=>{
+              this.setState(Object.assign(this.state.user,{entries:count}))
+            })
             .catch(err=> console.log("ooops err"))
-            console.log(this.state.box);
-           }
-    onRouteChange=(cur_route)=>{
-      if(cur_route==='home'){  this.setState({isSignedin:"true"})  }
-      else {  this.setState({isSignedin:"false"})  }
+            this.updateBox(this.calculateFaceLocation(response))
+            } 
+          })
+          .catch(err=> console.log("err in getting info from imageUrl"))
+          
+     }     
+            
+         
+           
+
+
+ onRouteChange=(cur_route)=>{
+      if(cur_route==='home'){  
+        this.setState({isSignedin:"true"})
+       }
+      else {  this.setState(intialState)  }
    this.setState({route:cur_route});
     }
 
@@ -90,15 +135,15 @@ const particleOptions={
      { this.state.route==='home'?
    <div>
      <Logo/>
-     <Rank/>
+     <Rank  name={this.state.user.name} entries={this.state.user.entries} />
      <ImageLinkForm  InputChange={this.onInputChange} Submit={this.onSubmit}/>
      <Facerecognition  box={this.state.box} imageUrl={this.state.input}/>
    </div>
       :
        ( this.state.route==='signin'?
-        <Signin onRouteChange={this.onRouteChange} />
+        <Signin onRouteChange={this.onRouteChange} loadUser={this.loadUser} />
         :
-        <Signup onRouteChange={this.onRouteChange} />   
+        <Signup onRouteChange={this.onRouteChange} loadUser={this.loadUser} />   
         )
          
      

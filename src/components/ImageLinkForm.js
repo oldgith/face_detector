@@ -9,7 +9,8 @@ const ImageLinkForm=({InputChange,Submit})=>{
    type="text"
    onChange={InputChange}
    />
-  <button className="w-30 grow link mid-gray bg-washed-red pv2"
+  <button 
+  className="w-30 grow link mid-gray bg-washed-red pv2"
   onClick={Submit}
   >Detect </button>
                </div> 
